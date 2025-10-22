@@ -38,7 +38,7 @@ class RedisQueue:
     async def close(self):
         """Закрытие соединения"""
         if self._redis:
-            await self._redis.close()
+            await self._redis.aclose()
             self._redis = None
             logger.info("Redis connection closed")
 

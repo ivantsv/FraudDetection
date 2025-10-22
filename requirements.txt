@@ -2,5 +2,7 @@ fastapi
 uvicorn[standard]
 typing
 redis[asyncio]
-json
 logging
+pytest
+pytest_asyncio
+asyncio
