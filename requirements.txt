@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+logging
+redis[asyncio]
+typing
+pytest
+pytest_asyncio
+asyncio
