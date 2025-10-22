@@ -1,2 +1,6 @@
 fastapi
 uvicorn[standard]
+typing
+redis[asyncio]
+json
+logging
