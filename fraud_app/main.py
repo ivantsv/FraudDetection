@@ -1,12 +1,10 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
-from db import init_db, get_db
-from sqlalchemy.ext.asyncio import AsyncSession
 from fastapi import Depends
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    await init_db()
+    # start
     yield
     # graceful shutdown
 

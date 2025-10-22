@@ -1,35 +1,11 @@
 version: "3.9"
 
 services:
-  db:
-    image: postgres:15
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: postgres
-      POSTGRES_DB: fraud_db
-    ports:
-      - "5432:5432"
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres -d fraud_db"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
-      start_period: 10s
-
   api:
     build: ./fraud_app
     command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
-    environment:
-      - DATABASE_URL=postgresql+asyncpg://postgres:postgres@db:5432/fraud_db
-    depends_on:
-      db:
-        condition: service_healthy
     restart: always
 
 volumes:
-  pgdata:
