@@ -3,8 +3,8 @@ import asyncio
 
 import pytest_asyncio
 
-from fraud_app.redis import RedisQueue
-from fraud_app.core.config import REDIS_URL
+from redis_queue_service import RedisQueue
+from core.config import REDIS_URL
 
 
 @pytest_asyncio.fixture

@@ -1,7 +1,9 @@
 services:
   api:
-    build: .
-    command: uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+    build:
+      context: .
+      dockerfile: server/Dockerfile
+    command: uvicorn server.main:app --host 0.0.0.0 --port 8000 --reload
     ports:
       - "8000:8000"
     environment:
@@ -14,17 +16,12 @@ services:
   tests_redis:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: tests/Dockerfile
     depends_on:
       redis:
         condition: service_healthy
     environment:
-      - PYTHONPATH=/app
       - REDIS_URL=redis://redis:6379/0
-    volumes:
-      - .:/app
-    command: [ "pytest", "-v", "tests/test_redis_queue.py" ]
-
 
   redis:
     image: redis:7
