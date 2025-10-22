@@ -11,7 +11,7 @@ services:
         condition: service_healthy
     restart: always
 
-  tests:
+  tests_redis:
     build:
       context: .
       dockerfile: Dockerfile
