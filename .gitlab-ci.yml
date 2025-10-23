@@ -5,16 +5,12 @@ stages:
   - down
 
 variables:
-  DOCKER_HOST: tcp://docker:2375
-  DOCKER_TLS_CERTDIR: ""
   COMPOSE_DOCKER_CLI_BUILD: "1"
   DOCKER_BUILDKIT: "1"
   PROJECT_NAME: hybrid_monolith
 
 default:
   image: docker:24.0.5
-  services:
-    - docker:dind
   before_script:
     - docker info
     - docker compose version
@@ -47,8 +43,8 @@ run_tests:
   stage: test
   script:
     - echo "Running tests..."
-    - docker compose -p $PROJECT_NAME run --rm tests_redis pytest --junitxml=/tmp/result.xml || true
-    - docker cp $(docker ps -aqf "name=${PROJECT_NAME}-tests_redis"):/tmp/result.xml ./result.xml || echo "No result.xml"
+    - docker compose -p $PROJECT_NAME run --rm tests_redis pytest --maxfail=1 --disable-warnings -q --junitxml=/tmp/result.xml || true
+    - docker cp $(docker ps -aqf "name=${PROJECT_NAME}-tests_redis"):/tmp/result.xml ./result.xml || echo "⚠️ No result.xml generated"
   after_script:
     - echo "Gathering logs..."
     - docker compose -p $PROJECT_NAME logs > compose_logs.txt || true
@@ -56,6 +52,7 @@ run_tests:
     when: always
     paths:
       - compose_logs.txt
+      - result.xml
     expire_in: 1 week
   only:
     - hybrid_monolith
