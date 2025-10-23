@@ -1,8 +1,8 @@
 fastapi
 uvicorn[standard]
-typing
-redis[asyncio]
 logging
+redis[asyncio]
+typing
 pytest
 pytest_asyncio
 asyncio
