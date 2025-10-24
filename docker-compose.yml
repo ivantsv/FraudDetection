@@ -13,7 +13,7 @@ services:
         condition: service_healthy
     restart: always
 
-  tests_redis:
+  tests:
     build:
       context: .
       dockerfile: tests/Dockerfile
@@ -37,6 +37,30 @@ services:
       timeout: 3s
       retries: 5
       start_period: 5s
+
+  ml-service:
+      build:
+        context: ./ml_service
+        dockerfile: Dockerfile
+      container_name: ml-service
+      ports:
+        - "50051:50051"
+      environment:
+        - MODEL_VERSION=1.0
+        - GRPC_PORT=50051
+        - MAX_WORKERS=10и
+      restart: always
+      healthcheck:
+        test: >
+          python -c "import grpc; from generated import ml_pb2, ml_pb2_grpc;
+          ch = grpc.insecure_channel('localhost:50051');
+          stub = ml_pb2_grpc.MLServiceStub(ch);
+          resp = stub.HealthCheck(ml_pb2.HealthCheckRequest());
+          exit(0 if resp.status == 'healthy' else 1)"
+        interval: 30s
+        timeout: 5s
+        retries: 3
+        start_period: 10s
 
 volumes:
   redisdata:

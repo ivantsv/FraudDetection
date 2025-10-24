@@ -43,8 +43,8 @@ run_tests:
   stage: test
   script:
     - echo "Running tests..."
-    - docker compose -p $PROJECT_NAME run --rm tests_redis pytest --maxfail=1 --disable-warnings -q --junitxml=/tmp/result.xml || true
-    - docker cp $(docker ps -aqf "name=${PROJECT_NAME}-tests_redis"):/tmp/result.xml ./result.xml || echo "⚠️ No result.xml generated"
+    - docker compose -p $PROJECT_NAME run --rm tests pytest --maxfail=1 --disable-warnings -q --junitxml=/tmp/result.xml || true
+    - docker cp $(docker ps -aqf "name=${PROJECT_NAME}-tests"):/tmp/result.xml ./result.xml || echo "⚠️ No result.xml generated"
   after_script:
     - echo "Gathering logs..."
     - docker compose -p $PROJECT_NAME logs > compose_logs.txt || true

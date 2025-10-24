@@ -1,0 +1,6 @@
+grpcio
+grpcio-tools
+protobuf
+lightgbm
+numpy
+grpcio-reflection
