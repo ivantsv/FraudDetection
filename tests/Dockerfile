@@ -9,4 +9,4 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
-CMD ["pytest", "-v", "tests/test_redis_queue.py"]
+CMD ["pytest", "-v", "tests"]

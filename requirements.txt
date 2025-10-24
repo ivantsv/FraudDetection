@@ -4,5 +4,6 @@ logging
 redis[asyncio]
 typing
 pytest
+httpx
 pytest_asyncio
 asyncio
