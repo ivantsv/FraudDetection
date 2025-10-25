@@ -12,6 +12,8 @@ services:
       redis:
         condition: service_healthy
     restart: always
+    networks:
+      - fraud-network
 
   tests:
     build:
@@ -22,6 +24,8 @@ services:
         condition: service_healthy
     environment:
       - REDIS_URL=redis://redis:6379/0
+    networks:
+      - fraud-network
 
   redis:
     image: redis:7
@@ -37,30 +41,77 @@ services:
       timeout: 3s
       retries: 5
       start_period: 5s
+    networks:
+      - fraud-network
 
   ml-service:
-      build:
-        context: ./ml_service
-        dockerfile: Dockerfile
-      container_name: ml-service
-      ports:
-        - "50051:50051"
-      environment:
-        - MODEL_VERSION=1.0
-        - GRPC_PORT=50051
-        - MAX_WORKERS=10и
-      restart: always
-      healthcheck:
-        test: >
-          python -c "import grpc; from generated import ml_pb2, ml_pb2_grpc;
-          ch = grpc.insecure_channel('localhost:50051');
-          stub = ml_pb2_grpc.MLServiceStub(ch);
-          resp = stub.HealthCheck(ml_pb2.HealthCheckRequest());
-          exit(0 if resp.status == 'healthy' else 1)"
-        interval: 30s
-        timeout: 5s
-        retries: 3
-        start_period: 10s
+    build:
+      context: .
+      dockerfile: ./ml_service/Dockerfile
+    container_name: ml-service
+    ports:
+      - "50051:50051"
+    environment:
+      - MODEL_VERSION=1.0
+      - GRPC_PORT=50051
+      - MAX_WORKERS=10
+      - METADATA_SERVICE_URL=metadata-service:50052
+    restart: always
+    healthcheck:
+      test: >
+        python -c "import grpc; from generated import ml_pb2, ml_pb2_grpc;
+        ch = grpc.insecure_channel('localhost:50051');
+        stub = ml_pb2_grpc.MLServiceStub(ch);
+        resp = stub.HealthCheck(ml_pb2.HealthCheckRequest());
+        exit(0 if resp.status == 'healthy' else 1)"
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - fraud-network
+
+  metadata-db:
+    image: postgres:15
+    container_name: metadata-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: metadata
+    ports:
+      - "5433:5432"
+    volumes:
+      - metadata_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d metadata"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - fraud-network
+
+  metadata-service:
+    build:
+      context: .
+      dockerfile: ./metadata_postgres_service/Dockerfile
+    container_name: metadata-service
+    restart: always
+    ports:
+      - "50052:50052"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://user:password@metadata-db:5432/metadata
+      - GRPC_PORT=50052
+    depends_on:
+      metadata-db:
+        condition: service_healthy
+    networks:
+      - fraud-network
 
 volumes:
   redisdata:
+  metadata_pgdata:
+
+networks:
+  fraud-network:
+    driver: bridge

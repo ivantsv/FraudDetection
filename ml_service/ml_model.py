@@ -17,7 +17,7 @@ class FraudDetectionModel:
         probability = random.random()
         return {
             "correlation_id": transaction["correlation_id"],
-            "fraud_probability": probability
+            "is_fraud": True if probability >= self.model_config.threshold else False
         }
     
     async def get_model_info(self) -> Dict:

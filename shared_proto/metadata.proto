@@ -1,0 +1,21 @@
+syntax = "proto3";
+
+package metadata;
+
+service MetadataDB {
+    rpc GetMLConfig(GetMLConfigRequest) returns (MLConfigResponse);
+
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message GetMLConfigRequest {};
+
+message MLConfigResponse {
+    double threshold = 1;
+}
+
+message HealthCheckRequest {};
+
+message HealthCheckResponse {
+    string status = 1;
+};

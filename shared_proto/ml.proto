@@ -30,7 +30,7 @@ message PredictRequest {
 
 message PredictResponse {
     string correlation_id = 1;
-    double fraud_probability = 2;
+    bool is_fraud = 2;
 }
 
 message HealthCheckRequest {}

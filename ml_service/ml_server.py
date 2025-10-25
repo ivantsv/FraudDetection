@@ -23,7 +23,6 @@ MODEL_VERSION = os.getenv("MODEL_VERSION", "1.0")
 GRPC_PORT = os.getenv("GRPC_PORT", "50051")
 MAX_WORKERS = int(os.getenv("MAX_WORKERS", "10"))
 
-# @TODO добавить из БД взятие threshold
 class MLServiceServicer(ml_pb2_grpc.MLServiceServicer):
     """Реализация gRPC сервиса"""
     
@@ -31,7 +30,8 @@ class MLServiceServicer(ml_pb2_grpc.MLServiceServicer):
         logger.info("Initializing ML Service...")
         
         try:
-            self.model = FraudDetectionModel(model_config=ModelConfig())
+            self.model_config = ModelConfig()
+            self.model = FraudDetectionModel(self.model_config)
             logger.info("ML Model loaded successfully")
             
         except Exception as e:
@@ -49,12 +49,12 @@ class MLServiceServicer(ml_pb2_grpc.MLServiceServicer):
             
             response = ml_pb2.PredictResponse(
                 correlation_id=result["correlation_id"],
-                fraud_probability=result["fraud_probability"]
+                is_fraud=result["is_fraud"]
             )
             
             logger.info(
                 f"Prediction: {request.correlation_id} -> "
-                f"prob={result['fraud_probability']:.4f}"
+                f"is_fraud={result['is_fraud']}"
             )
             
             return response
@@ -117,7 +117,10 @@ async def serve():
     )
     reflection.enable_server_reflection(SERVICE_NAMES, server)
 
-    ml_pb2_grpc.add_MLServiceServicer_to_server(MLServiceServicer(), server)
+    service = MLServiceServicer()
+    await service.model_config.fetch_threshold()
+
+    ml_pb2_grpc.add_MLServiceServicer_to_server(service, server)
     
     server.add_insecure_port(f'[::]:{GRPC_PORT}')
     

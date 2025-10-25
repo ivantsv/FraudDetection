@@ -1,0 +1,4 @@
+CREATE TABLE IF NOT EXISTS ml_configs (
+    id SERIAL PRIMARY KEY,
+    threshold DECIMAL(5, 3) NOT NULL DEFAULT 0.5
+);

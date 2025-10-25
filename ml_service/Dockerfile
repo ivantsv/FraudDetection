@@ -5,20 +5,16 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    make \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
+COPY ml_service/requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN python -m grpc_tools.protoc \
-    -I./proto \
-    --python_out=./generated \
-    --grpc_python_out=./generated \
-    ./proto/ml.proto
-
-RUN touch generated/__init__.py proto/__init__.py
+RUN make -C shared_proto ml OUT_DIR=../ml_service/generated
+RUN make -C shared_proto metadata OUT_DIR=../ml_service/generated
 
 EXPOSE 50051
 
@@ -30,4 +26,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
     exit(0 if response.status == 'healthy' else 1)" || exit 1
 
 
-CMD ["python", "ml_server.py"]
+CMD ["python", "ml_service/ml_server.py"]

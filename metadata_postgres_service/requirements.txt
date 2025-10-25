@@ -1,0 +1,8 @@
+grpcio
+grpcio-tools
+protobuf
+sqlalchemy
+psycopg2-binary
+python-dotenv
+asyncpg
+grpcio-reflection
