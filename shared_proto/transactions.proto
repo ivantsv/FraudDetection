@@ -1,0 +1,35 @@
+syntax = "proto3";
+
+package transactions;
+
+service TransactionsDB {
+    rpc InsertTransaction(InsertTransactionRequest) returns (InsertTransactionResponse);
+
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message InsertTransactionRequest {
+    string transaction_id = 1;
+    string timestamp = 2;
+    string sender_account = 3;
+    string receiver_account = 4;
+    double amount = 5;
+    string transaction_type = 6;
+    string merchant_category = 7;
+    string location = 8;
+    string device_used = 9;
+    string payment_channel = 10;
+    string ip_address = 11;
+    string device_hash = 12;
+    string correlation_id = 13;
+};
+
+message InsertTransactionResponse {
+    string status = 1;
+}
+
+message HealthCheckRequest {};
+
+message HealthCheckResponse {
+    string status = 1;
+};

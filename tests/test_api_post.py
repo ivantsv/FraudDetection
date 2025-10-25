@@ -19,9 +19,6 @@ valid_payload = {
     "device_hash": "abcdef12345678"
 }
 
-# -------------------------------
-# Успешная транзакция
-# -------------------------------
 def test_post_transaction_success(monkeypatch):
     async def mock_push(*args, **kwargs):
         return 1
@@ -38,34 +35,6 @@ def test_post_transaction_success(monkeypatch):
     assert data["status"] == "accepted"
     assert data["transaction_id"] == payload["transaction_id"]
 
-
-# -------------------------------
-# Повтор транзакции
-# -------------------------------
-def test_post_transaction_duplicate(monkeypatch):
-    async def mock_push(*args, **kwargs):
-        return 1
-
-    from redis_queue_service import RedisQueue
-    monkeypatch.setattr(RedisQueue, "push", mock_push)
-
-    payload = valid_payload.copy()
-    payload["transaction_id"] = "TXN003"
-
-    # первый запрос
-    response1 = client.post("/post", json=payload)
-    assert response1.status_code == 200
-
-    # второй запрос — дубликат
-    response2 = client.post("/post", json=payload)
-    assert response2.status_code == 409
-    data = response2.json()
-    assert data["detail"]["error"] == "duplicate_transaction"
-
-
-# -------------------------------
-# sender == receiver
-# -------------------------------
 def test_post_transaction_sender_equals_receiver():
     payload = valid_payload.copy()
     payload["transaction_id"] = "TXN004"
@@ -75,13 +44,8 @@ def test_post_transaction_sender_equals_receiver():
     response = client.post("/post", json=payload)
     assert response.status_code == 422
     data = response.json()
-    # проверяем, что ошибка касается поля receiver_account
     assert any(err["loc"][-1] == "receiver_account" for err in data["detail"])
 
-
-# -------------------------------
-# Недопустимый тип транзакции
-# -------------------------------
 def test_post_transaction_invalid_type():
     payload = valid_payload.copy()
     payload["transaction_id"] = "TXN005"
@@ -92,10 +56,6 @@ def test_post_transaction_invalid_type():
     data = response.json()
     assert any(err["loc"][-1] == "transaction_type" for err in data["detail"])
 
-
-# -------------------------------
-# Отрицательная сумма
-# -------------------------------
 def test_post_transaction_negative_amount():
     payload = valid_payload.copy()
     payload["transaction_id"] = "TXN006"
@@ -106,10 +66,6 @@ def test_post_transaction_negative_amount():
     data = response.json()
     assert any(err["loc"][-1] == "amount" for err in data["detail"])
 
-
-# -------------------------------
-# Отсутствует обязательное поле
-# -------------------------------
 def test_post_transaction_missing_required_field():
     payload = valid_payload.copy()
     payload["transaction_id"] = "TXN007"
@@ -120,10 +76,6 @@ def test_post_transaction_missing_required_field():
     data = response.json()
     assert any(err["loc"][-1] == "transaction_type" for err in data["detail"])
 
-
-# -------------------------------
-# Некорректный IP
-# -------------------------------
 def test_post_transaction_invalid_ip():
     payload = valid_payload.copy()
     payload["transaction_id"] = "TXN008"

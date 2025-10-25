@@ -5,7 +5,6 @@ from transaction import TransactionRequest
 from core import REDIS_URL
 
 redis_queue = RedisQueue(REDIS_URL)
-transactions_db = {}
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -29,18 +28,7 @@ async def echo(msg: str):
 
 @app.post("/post")
 async def receive_transaction(tx: TransactionRequest, background_tasks: BackgroundTasks):
-    if tx.transaction_id in transactions_db:
-        raise HTTPException(
-            status_code=409,
-            detail={
-                "error": "duplicate_transaction",
-                "message": f"Транзакция с ID '{tx.transaction_id}' уже существует"
-            },
-        )
-
     background_tasks.add_task(redis_queue.push, tx.to_dict())
-
-    transactions_db[tx.transaction_id] = tx.model_dump()
 
     return {
         "status": "accepted",

@@ -91,6 +91,26 @@ services:
     networks:
       - fraud-network
 
+  transactions-db:
+    image: postgres:15
+    container_name: transactions-db
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: transactions
+    ports:
+      - "5432:5432"
+    volumes:
+      - transactions_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U user -d transactions"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+    networks:
+      - fraud-network
+
   metadata-service:
     build:
       context: .
@@ -108,9 +128,27 @@ services:
     networks:
       - fraud-network
 
+  transactions-service:
+    build:
+      context: .
+      dockerfile: ./requests_history_service/Dockerfile
+    container_name: transactions-service
+    restart: always
+    ports:
+      - "50053:50053"
+    environment:
+      - DATABASE_URL=postgresql+asyncpg://user:password@transactions-db:5432/transactions
+      - GRPC_PORT=50053
+    depends_on:
+      transactions-db:
+        condition: service_healthy
+    networks:
+      - fraud-network
+
 volumes:
   redisdata:
   metadata_pgdata:
+  transactions_pgdata:
 
 networks:
   fraud-network:
