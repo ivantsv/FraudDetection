@@ -35,7 +35,7 @@ up_services:
     - docker compose -p $PROJECT_NAME up -d
     - echo "Waiting for all containers to become healthy..."
     - >
-      timeout 120 bash -c '
+      timeout 120 sh -c '
       while true; do
         unhealthy=$(docker ps --filter "health=unhealthy" --filter "name=${PROJECT_NAME}" --format "{{.Names}}");
         starting=$(docker ps --filter "health=starting" --filter "name=${PROJECT_NAME}" --format "{{.Names}}");
