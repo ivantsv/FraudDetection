@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package fraud_detection;
+
+service MLService {
+    rpc Predict(PredictRequest) returns (PredictResponse);
+
+    rpc HealthCheck(HealthCheckRequest) returns (HealthCheckResponse);
+}
+
+message PredictRequest {
+    string transaction_id = 1;
+    string timestamp = 2;
+    string sender_account = 3;
+    string receiver_account = 4;
+    double amount = 5;
+    string transaction_type = 6;
+    string merchant_category = 7;
+    string location = 8;
+    string device_used = 9;
+    string payment_channel = 10;
+    string ip_address = 11;
+    string device_hash = 12;
+    double time_since_last_transaction = 13;
+    double spending_deviation_score = 14;
+    double velocity_score = 15;
+    double geo_anomaly_score = 16;
+    string correlation_id = 17;
+}
+
+message PredictResponse {
+    string correlation_id = 1;
+    bool is_fraud = 2;
+}
+
+message HealthCheckRequest {}
+
+message HealthCheckResponse {
+  string status = 1;
+}

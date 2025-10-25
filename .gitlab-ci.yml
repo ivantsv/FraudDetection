@@ -18,6 +18,7 @@ default:
 build_images:
   stage: build
   script:
+    - echo "Building all Docker images..."
     - docker compose -p $PROJECT_NAME build
     - docker images
   artifacts:
@@ -30,9 +31,21 @@ build_images:
 up_services:
   stage: up
   script:
-    - docker compose -p $PROJECT_NAME up -d redis api
-    - docker compose -p $PROJECT_NAME ps
-    - sleep 10
+    - echo "Starting all services..."
+    - docker compose -p $PROJECT_NAME up -d
+    - echo "Waiting for all containers to become healthy..."
+    - >
+      timeout 120 bash -c '
+      while true; do
+        unhealthy=$(docker ps --filter "health=unhealthy" --filter "name=${PROJECT_NAME}" --format "{{.Names}}");
+        starting=$(docker ps --filter "health=starting" --filter "name=${PROJECT_NAME}" --format "{{.Names}}");
+        if [ -z "$unhealthy" ] && [ -z "$starting" ]; then
+          echo "All containers are healthy!";
+          break;
+        fi;
+        echo "Waiting... (unhealthy: $unhealthy, starting: $starting)";
+        sleep 5;
+      done'
     - docker compose -p $PROJECT_NAME ps
   only:
     - hybrid_monolith
@@ -43,8 +56,8 @@ run_tests:
   stage: test
   script:
     - echo "Running tests..."
-    - docker compose -p $PROJECT_NAME run --rm tests_redis pytest --maxfail=1 --disable-warnings -q --junitxml=/tmp/result.xml || true
-    - docker cp $(docker ps -aqf "name=${PROJECT_NAME}-tests_redis"):/tmp/result.xml ./result.xml || echo "⚠️ No result.xml generated"
+    - docker compose -p $PROJECT_NAME run --rm tests pytest --maxfail=1 --disable-warnings -q --junitxml=/tmp/result.xml || true
+    - docker cp $(docker ps -aqf "name=${PROJECT_NAME}-tests"):/tmp/result.xml ./result.xml || echo "⚠️ No result.xml generated"
   after_script:
     - echo "Gathering logs..."
     - docker compose -p $PROJECT_NAME logs > compose_logs.txt || true

@@ -7,3 +7,7 @@ pytest
 httpx
 pytest_asyncio
 asyncio
+lightgbm
+numpy
+pandas
+jsonschema

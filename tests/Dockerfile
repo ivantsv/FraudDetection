@@ -9,4 +9,4 @@ COPY . .
 
 ENV PYTHONPATH=/app
 
-CMD ["pytest", "-v", "tests"]
+CMD ["pytest", "-v"]
