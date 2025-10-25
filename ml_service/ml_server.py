@@ -38,14 +38,14 @@ class MLServiceServicer(ml_pb2_grpc.MLServiceServicer):
             logger.error(f"Failed to load model: {e}")
             raise
 
-    def Predict(self, request, context):
+    async def Predict(self, request, context):
         """Предсказание для одной транзакции"""
         try:
             logger.info(f"Predict request: {request.correlation_id}")
             
             transaction = self._proto_to_dict(request)
             
-            result = asyncio.run(self.model.predict(transaction))
+            result = await self.model.predict(transaction)
             
             response = ml_pb2.PredictResponse(
                 correlation_id=result["correlation_id"],
@@ -65,10 +65,10 @@ class MLServiceServicer(ml_pb2_grpc.MLServiceServicer):
             context.set_details(f"Prediction error: {str(e)}")
             return ml_pb2.PredictResponse()
         
-    def HealthCheck(self, request, context):
+    async def HealthCheck(self, request, context):
         """Health check"""
         try:
-            info = self.model.get_model_info()
+            info = await self.model.get_model_info()
             
             return ml_pb2.HealthCheckResponse(
                 status="healthy"
@@ -101,9 +101,9 @@ class MLServiceServicer(ml_pb2_grpc.MLServiceServicer):
             "correlation_id": proto_request.correlation_id
         }
     
-def serve():
+async def serve():
     """Запуск gRPC сервера"""
-    server = grpc.server(
+    server = grpc.aio.server(
         futures.ThreadPoolExecutor(max_workers=MAX_WORKERS),
         options=[
             ('grpc.max_send_message_length', 50 * 1024 * 1024),
@@ -124,15 +124,15 @@ def serve():
     logger.info(f"gRPC Server starting on port {GRPC_PORT}")
     logger.info(f"Workers: {MAX_WORKERS}")
     
-    server.start()
+    await server.start()
     logger.info("Server started successfully!")
     
     try:
-        server.wait_for_termination()
+        await server.wait_for_termination()
     except KeyboardInterrupt:
         logger.info("Shutting down...")
-        server.stop(0)
+        await server.stop(0)
 
 
 if __name__ == '__main__':
-    serve()
+    asyncio.run(serve())
