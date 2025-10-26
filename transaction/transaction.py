@@ -43,6 +43,6 @@ class TransactionRequest(BaseModel):
     def to_dict(self):
         return {
             **self.model_dump(),
-            "timestamp": str(self.ip_address),
+            "timestamp": self.timestamp.isoformat(),
             "ip_address": str(self.ip_address)
         }
