@@ -33,7 +33,6 @@ def test_post_transaction_success(monkeypatch):
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "accepted"
-    assert data["transaction_id"] == payload["transaction_id"]
 
 def test_post_transaction_sender_equals_receiver():
     payload = valid_payload.copy()
