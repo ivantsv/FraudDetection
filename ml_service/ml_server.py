@@ -7,9 +7,7 @@ import sys
 from pathlib import Path
 from grpc_reflection.v1alpha import reflection
 
-sys.path.insert(0, str(Path(__file__).parent / "generated"))
-
-from generated import ml_pb2, ml_pb2_grpc
+from generated_proto import ml_pb2, ml_pb2_grpc
 from ml_model import FraudDetectionModel
 from model_config import ModelConfig
 

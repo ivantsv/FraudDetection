@@ -7,9 +7,7 @@ from pathlib import Path
 from sqlalchemy import select
 from grpc_reflection.v1alpha import reflection
 
-sys.path.insert(0, str(Path(__file__).parent / "generated"))
-
-from generated import metadata_pb2, metadata_pb2_grpc
+from generated_proto import metadata_pb2, metadata_pb2_grpc
 from database import async_session_maker, init_db, MLConfig
 
 logging.basicConfig(

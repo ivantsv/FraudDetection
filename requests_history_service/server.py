@@ -8,9 +8,7 @@ from sqlalchemy import insert, select
 from grpc_reflection.v1alpha import reflection
 from datetime import datetime
 
-sys.path.insert(0, str(Path(__file__).parent / "generated"))
-
-from generated import transactions_pb2, transactions_pb2_grpc
+from generated_proto import transactions_pb2, transactions_pb2_grpc
 from database import async_session_maker, init_db, TransactionHistory
 
 logging.basicConfig(

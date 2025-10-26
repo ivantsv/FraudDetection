@@ -3,8 +3,12 @@ from contextlib import asynccontextmanager
 from redis_queue_service import RedisQueue
 from transaction import TransactionRequest
 from core import REDIS_URL
+from logging_config import setup_logger
+import uuid
+
 
 redis_queue = RedisQueue(REDIS_URL)
+logger = setup_logger(component="ingest")
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -28,10 +32,21 @@ async def echo(msg: str):
 
 @app.post("/post")
 async def receive_transaction(tx: TransactionRequest, background_tasks: BackgroundTasks):
-    background_tasks.add_task(redis_queue.push, tx.to_dict())
+    transaction = tx.to_dict()
+    transaction["correlation_id"] = str(uuid.uuid4())
+
+    logger.info("Transaction received", extra={
+        "correlation_id": transaction["correlation_id"],
+        "event": "transaction_received",
+        "transaction_id": tx.transaction_id,
+        "account": tx.sender_account,
+        "amount": tx.amount
+    })
+
+    background_tasks.add_task(redis_queue.push, transaction)
 
     return {
         "status": "accepted",
-        "transaction_id": tx.transaction_id,
+        "correlation_id": transaction["correlation_id"],
         "message": "Транзакция успешно принята в обработку"
     }

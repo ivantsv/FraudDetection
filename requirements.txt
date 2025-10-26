@@ -11,3 +11,5 @@ lightgbm
 numpy
 pandas
 jsonschema
+python-json-logger
+uuid

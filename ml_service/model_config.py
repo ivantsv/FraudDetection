@@ -2,7 +2,7 @@ import grpc
 import logging
 import os
 
-from generated import metadata_pb2_grpc, metadata_pb2
+from generated_proto import metadata_pb2_grpc, metadata_pb2
 
 logger = logging.getLogger(__name__)
 

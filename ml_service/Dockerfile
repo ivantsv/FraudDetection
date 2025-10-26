@@ -1,5 +1,9 @@
 FROM python:3.12-slim
 
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONPATH=/app
+
 WORKDIR /app
 
 RUN apt-get update && apt-get install -y \
@@ -13,8 +17,8 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN make -C shared_proto ml OUT_DIR=../ml_service/generated
-RUN make -C shared_proto metadata OUT_DIR=../ml_service/generated
+RUN make -C shared_proto ml
+RUN make -C shared_proto metadata
 
 EXPOSE 50051
 
