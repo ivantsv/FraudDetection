@@ -26,7 +26,10 @@ class TransactionRequest(BaseModel):
 
     @field_validator("timestamp")
     @classmethod
-    def validate_timestamp_not_future(cls, v):
+    def validate_timestamp_not_future(cls, v: datetime):
+        if v.tzinfo is None:
+            v = v.replace(tzinfo=timezone.utc)
+
         now = datetime.now(timezone.utc)
         if v > now:
             raise ValueError("timestamp не может быть из будущего")

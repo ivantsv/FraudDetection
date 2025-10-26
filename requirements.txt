@@ -13,3 +13,7 @@ pandas
 jsonschema
 python-json-logger
 uuid
+grpcio
+grpcio-tools
+protobuf
+grpcio-reflection
