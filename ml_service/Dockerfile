@@ -18,7 +18,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 RUN make -C shared_proto ml
-RUN make -C shared_proto metadata
+RUN make -C shared_proto metadata fix-imports
 
 EXPOSE 50051
 

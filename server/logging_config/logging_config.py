@@ -1,6 +1,5 @@
 import logging
 import sys
-import json
 from pythonjsonlogger import jsonlogger
 
 class CustomJsonFormatter(jsonlogger.JsonFormatter):

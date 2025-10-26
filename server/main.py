@@ -3,7 +3,7 @@ from contextlib import asynccontextmanager
 from redis_queue_service import RedisQueue
 from transaction import TransactionRequest
 from core import REDIS_URL
-from logging_config import setup_logger
+from server.logging_config.logging_config import setup_logger
 import uuid
 
 

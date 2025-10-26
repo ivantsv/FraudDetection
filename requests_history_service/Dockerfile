@@ -15,7 +15,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-RUN make -C shared_proto transactions
+RUN make -C shared_proto transactions fix-imports
 
 EXPOSE 50053
 
